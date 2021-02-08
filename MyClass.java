@@ -1,4 +1,4 @@
-public class MyClass {
+public class MySyntax {
 	public static void main(String[] args) {
 		System.out.println("Java [IT114-004-S21] Exercise [#1]");
 		System.out.println("Hello World!");
