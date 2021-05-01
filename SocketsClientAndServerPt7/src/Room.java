@@ -16,6 +16,8 @@ public class Room implements AutoCloseable {
 	private final static String JOIN_ROOM = "joinroom";
 	private final static String FLIP = "flip";
 	private final static String ROLL = "roll";
+	// private final static String MUTE = "mute";
+	// private final static String UNMUTE = "unmute";
 
 	public Room(String name) {
 		this.name = name;
@@ -120,21 +122,41 @@ public class Room implements AutoCloseable {
 					Random rand = new Random();
 					int value = rand.nextInt(2);
 					if (value == 0) {
-						response = "Tails";
+						response = "<font face=\"Papyrus,\" size=\"15px\" color=\"#13489E\">Flipping... " + "Tails";
 					} else {
-						response = "Heads";
+						response = "<font face=\"Papyrus,\" size=\"15px\" color=\"#13489E\">Flipping... " + "Heads";
 					}
 					break;
 				case ROLL:
 					Random rand2 = new Random();
-					response = Integer.toString(rand2.nextInt(Integer.parseInt(comm2[1]) + 1));
+					response = "<font face=\"Brush Script MT\" size=\"25px\" color=\"#862916\">Rolling... "
+							+ Integer.toString(rand2.nextInt(Integer.parseInt(comm2[1]) + 1)) + "</font>";
 					break;
+				// case MUTE:
+
+				// break;
+				// case UNMUTE:
+
+				// break;
 				default:
 					response = message;
 					break;
 				}
 			} else {
 				String alteredMessage = message;
+
+				// adds a user to a list where messages would be sent privately
+				if (alteredMessage.indexOf("@") > -1) {
+					String[] ats = alteredMessage.split("@");
+					List<String> usersPrivateMessage = new ArrayList<String>();
+					for (int i = 0; i < ats.length; i++) {
+						if (i % 2 != 0) {
+							String[] data = ats[i].split(" ");
+							String user = data[0];
+							usersPrivateMessage.add(user);
+						}
+					}
+				}
 
 				if (alteredMessage.indexOf("*") > -1) {
 					String[] s1 = alteredMessage.split("\\*");
@@ -188,6 +210,12 @@ public class Room implements AutoCloseable {
 					}
 					alteredMessage = m;
 				}
+				if (alteredMessage.indexOf("@") > -1) {
+					String[] s1 = alteredMessage.split("\\@");
+					String[] s2 = s1[1].split(" ", 2);
+					sendSystemMessage(s2[1], s2[0]);
+					alteredMessage = null;
+				}
 				response = alteredMessage;
 			}
 		} catch (Exception e) {
@@ -234,6 +262,27 @@ public class Room implements AutoCloseable {
 				log.log(Level.INFO, "Removed client " + client.getId());
 			}
 		}
+	}
+
+	protected void sendSystemMessage(String message, String target) {
+		Iterator<ServerThread> iter = clients.iterator();
+		while (iter.hasNext()) {
+			ServerThread client = iter.next();
+			if (target == null || client.getClientName().equals(target)) {
+				boolean messageSent = client.send("Pssst Whisper Recieved", message);
+				if (!messageSent) {
+					iter.remove();
+					log.log(Level.INFO, "Removed client " + client.getId());
+				}
+				if (target != null) {
+					break;
+				}
+			}
+		}
+	}
+
+	protected void sendSystemMessage(String message) {
+		sendSystemMessage(message, null);
 	}
 
 	/***

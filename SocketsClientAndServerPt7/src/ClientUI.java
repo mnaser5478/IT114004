@@ -291,7 +291,7 @@ public class ClientUI extends JFrame implements Event {
 	}
 
 	public static void main(String[] args) {
-		ClientUI ui = new ClientUI("My UI");
+		ClientUI ui = new ClientUI("Discord 2.0");
 		if (ui != null) {
 			log.log(Level.FINE, "Started");
 		}
